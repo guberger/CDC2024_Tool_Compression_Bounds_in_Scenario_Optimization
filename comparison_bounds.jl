@@ -27,8 +27,8 @@ plt = plot(xlabel=L"d", ylabel=L"\epsilon", legend=:bottomright,
 ks = collect(0:N)
 
 for (bound, name, color) in bounds_full_with_info
-      risk(k) = bound(k, β, N, Inf)
-      plot!(plt, ks, risk.(ks), c=color, label=name)
+    risk(k) = bound(k, β, N, Inf)
+    plot!(plt, ks, risk.(ks), c=color, label=name)
 end
 
 savefig(plt, "figures/compare_full.png")
@@ -39,16 +39,16 @@ plt = plot(xlabel=L"d", ylabel=L"\epsilon", legend=:bottomright,
 ks = collect(0:N)
 
 for (bound, name, color) in bounds_partial_with_info
-      risk(k) = bound(k, β, N, r)
-      plot!(plt, ks, risk.(ks), c=color, label=name)
+    risk(k) = bound(k, β, N, r)
+    plot!(plt, ks, risk.(ks), c=color, label=name)
 end
 
 savefig(plt, "figures/compare_partial.png")
 
 #-------------------------------------------------------------------------------
 βs_with_info = [
-      (0.05, :solid, "solid"),
-      (0.005, :dash, "dash"),
+    (0.05, :solid, "solid"),
+    (0.005, :dash, "dash"),
 ]
 title_β = join([
     "$(β)\$ ($(lsn))" for (β, _, lsn) in βs_with_info 
@@ -90,8 +90,8 @@ savefig(plt, "figures/compare_N.png")
 
 #-------------------------------------------------------------------------------
 rs_with_info = [
-      (50, :solid, "solid"),
-      (25, :dash, "dash"),
+    (50, :solid, "solid"),
+    (25, :dash, "dash"),
 ]
 title_r = join([
     "$(r)\$ ($(lsn))" for (r, _, lsn) in rs_with_info 
