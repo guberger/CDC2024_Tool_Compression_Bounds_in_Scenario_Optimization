@@ -17,7 +17,7 @@ binpdf(N, k, p) = exp(binlogpdf(N, k, p))
 #-------------------------------------------------------------------------------
 # Full consistency
 
-function floyd_full_risk(d, β, N)::Float64
+function floyd_strong_risk(d, β, N)::Float64
     if β ≥ 1 || d ≤ 0
         return 0.0
     end
@@ -27,7 +27,7 @@ function floyd_full_risk(d, β, N)::Float64
     return 1 - exp((log(β) - logbinomial(N, d)) / (N - d))
 end
 
-function campi_full_risk(d, β, N)::Float64
+function campi_strong_risk(d, β, N)::Float64
     if β ≥ 1 || d ≤ 0
         return 0.0
     end
@@ -39,7 +39,7 @@ function campi_full_risk(d, β, N)::Float64
     return find_zero(f, (0, 1))
 end
 
-function berger_full_risk(d, β, N)::Float64
+function berger_strong_risk(d, β, N)::Float64
     if β ≥ 1 || d ≤ 0
         return 0.0
     end
@@ -56,7 +56,7 @@ end
 #-------------------------------------------------------------------------------
 # Wait and Judge
 
-function garatti_wait_risk(k, β, N)::Float64
+function garatti_posteriori_risk(k, β, N)::Float64
     if β ≥ 1
         return 0.0
     end
@@ -73,7 +73,7 @@ end
 #-------------------------------------------------------------------------------
 # Sample and Discard
 
-function margellos_partial_risk(d, β, N, r)::Float64
+function margellos_weak_risk(d, β, N, r)::Float64
     if β ≥ 1 || d ≤ 0
         return 0.0
     end
@@ -85,7 +85,7 @@ function margellos_partial_risk(d, β, N, r)::Float64
     return find_zero(f, (0, 1))
 end
 
-function campi_partial_risk(d, β, N, r)::Float64
+function campi_weak_risk(d, β, N, r)::Float64
     if β ≥ 1 || d ≤ 0
         return 0.0
     end
@@ -97,7 +97,7 @@ function campi_partial_risk(d, β, N, r)::Float64
     return find_zero(f, (0, 1))
 end
 
-function romao_partial_risk(d, β, N, r)::Float64
+function romao_weak_risk(d, β, N, r)::Float64
     if β ≥ 1 || d ≤ 0
         return 0.0
     end
@@ -109,15 +109,7 @@ function romao_partial_risk(d, β, N, r)::Float64
     return find_zero(f, (0, 1))
 end
 
-# function _berger1_partial_risk(d, β, N, r)::Float64
-#     g1(m, v) = log(1 - v) * (N - r - m) - logbinomial(m, d)
-#     g2(v) = minimum(m -> g1(m, v), d:(N - r))
-#     g3(v) = v ≥ 1 ? -Inf : g2(v)
-#     f(v) = log(β) - logbinomial(N, r) - logbinomial(N - r, d) - g3(v)
-#     return find_zero(f, (0, 1))
-# end
-
-function berger_partial_risk(d, β, N, r)::Float64
+function berger_weak_risk(d, β, N, r)::Float64
     if β ≥ 1 || d ≤ 0
         return 0.0
     end

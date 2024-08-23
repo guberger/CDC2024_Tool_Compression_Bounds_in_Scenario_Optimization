@@ -6,17 +6,17 @@ using Plots
 include("bounds.jl")
 colors = palette(:default)
 bounds_with_info = [
-    ((k, β, N, _) -> floyd_full_risk(k, β, N), "Theorem 1", colors[1]),
-    ((k, β, N, _) -> campi_full_risk(k, β, N), "Theorem 2", colors[2]),
-    ((k, β, N, _) -> garatti_wait_risk(k, β, N), "Theorem 3", colors[3]),
-    ((k, β, N, _) -> berger_full_risk(k, β, N), "Theorem 4", colors[4]),
-    (campi_partial_risk, "Theorem 5", colors[5]),
-    (margellos_partial_risk, "Theorem 6", colors[6]),
-    (romao_partial_risk, "Theorem 7", colors[7]),
-    (berger_partial_risk, "Theorem 8", :black),
+    ((k, β, N, _) -> floyd_strong_risk(k, β, N), "Theorem 1", colors[1]),
+    ((k, β, N, _) -> campi_strong_risk(k, β, N), "Theorem 2", colors[2]),
+    ((k, β, N, _) -> garatti_posteriori_risk(k, β, N), "Theorem 3", colors[3]),
+    ((k, β, N, _) -> berger_strong_risk(k, β, N), "Theorem 4", colors[4]),
+    (campi_weak_risk, "Theorem 5", colors[5]),
+    (margellos_weak_risk, "Theorem 6", colors[6]),
+    (romao_weak_risk, "Theorem 7", colors[7]),
+    (berger_weak_risk, "Theorem 8", :black),
 ]
-bounds_full_with_info = bounds_with_info[1:4]
-bounds_partial_with_info = bounds_with_info[5:8]
+bounds_strong_with_info = bounds_with_info[1:4]
+bounds_weak_with_info = bounds_with_info[5:8]
 β = 0.05
 N = 500
 r = 50
@@ -25,93 +25,127 @@ r = 50
 plt = plot(xlabel=L"d", ylabel=L"\epsilon", legend=:bottomright,
            title="\$N=$(N)\$, \$q(N,\\epsilon)=$(β)\$", dpi=1000)
 ks = collect(0:N)
+R = fill(NaN, length(ks), length(bounds_strong_with_info) + 1)
+R[:, 1] = ks
 
-for (bound, name, color) in bounds_full_with_info
+for (i, (bound, name, color)) in enumerate(bounds_strong_with_info)
     risk(k) = bound(k, β, N, Inf)
-    plot!(plt, ks, risk.(ks), c=color, label=name)
+    # R[:, i + 1] = risk.(ks)
+    # plot!(plt, ks, R[:, i + 1], c=color, label=name)
 end
 
-savefig(plt, "figures/compare_full.png")
+savefig(plt, "figures/compare_strong.png")
+file = open("data_strong.txt", "w")
+for row in eachrow(R)
+    for val in row
+        print(file, val, " ")
+    end
+    println(file, "")
+end
+close(file)
 
 #-------------------------------------------------------------------------------
 plt = plot(xlabel=L"d", ylabel=L"\epsilon", legend=:bottomright,
            title="\$N=$(N)\$, \$r=$(r)\$, \$q(N,\\epsilon)=$(β)\$", dpi=1000)
 ks = collect(0:N)
+R = fill(NaN, length(ks), length(bounds_weak_with_info) + 1)
+R[:, 1] = ks
 
-for (bound, name, color) in bounds_partial_with_info
+for (i, (bound, name, color)) in enumerate(bounds_weak_with_info)
     risk(k) = bound(k, β, N, r)
-    plot!(plt, ks, risk.(ks), c=color, label=name)
+    # R[:, i + 1] = risk.(ks)
+    # plot!(plt, ks, R[:, i + 1], c=color, label=name)
 end
 
-savefig(plt, "figures/compare_partial.png")
+savefig(plt, "figures/compare_weak.png")
+file = open("data_weak.txt", "w")
+for row in eachrow(R)
+    for val in row
+        print(file, val, " ")
+    end
+    println(file, "")
+end
+close(file)
 
 #-------------------------------------------------------------------------------
-βs_with_info = [
-    (0.05, :solid, "solid"),
-    (0.005, :dash, "dash"),
-]
-title_β = join([
-    "$(β)\$ ($(lsn))" for (β, _, lsn) in βs_with_info 
-], ", \$", " or \$")
-title = join(["\$N=$(N)\$, \$r=$(r)\$, \$q(N,\\epsilon)=", title_β])
+β = 0.005
 
 plt = plot(xlabel=L"d", ylabel=L"\epsilon", legend=:bottomright,
-           title=title, dpi=1000)
+           title="\$N=$(N)\$, \$r=$(r)\$, \$q(N,\\epsilon)=$(β)\$", dpi=1000)
 ks = collect(0:N)
-for (β, ls, _) in βs_with_info
-    for (bound, name, color) in bounds_with_info
-        risk(k) = bound(k, β, N, r)
-        plot!(plt, ks, risk.(ks), c=color, ls=ls, label=false)
-    end
-end
-# labels
-for (_, name, color) in bounds_with_info
-    plot!(plt, [], [], c=color, ls=:solid, label=name)
+R = fill(NaN, length(ks), length(bounds_with_info) + 1)
+R[:, 1] = ks
+
+for (i, (bound, name, color)) in enumerate(bounds_with_info)
+    risk(k) = bound(k, β, N, r)
+    # R[:, i + 1] = risk.(ks)
+    # plot!(plt, ks, R[:, i + 1], c=color, label=name)
 end
 
 savefig(plt, "figures/compare_beta.png")
+file = open("data_beta.txt", "w")
+for row in eachrow(R)
+    for val in row
+        print(file, val, " ")
+    end
+    println(file, "")
+end
+close(file)
+
+β = 0.05
 
 #-------------------------------------------------------------------------------
-Ntest = 5000
-rtest = 500
-kstest = collect(0:Ntest)
+N = 5000
+r = 500
 
 plt = plot(xlabel=L"d", ylabel=L"\epsilon", legend=:bottomright,
-           title="\$N=$(Ntest)\$, \$r=$(rtest)\$, \$q(N,\\epsilon)=$(β)\$",
-           dpi=1000)
-ks = collect(0:N)
+           title="\$N=$(N)\$, \$r=$(r)\$, \$q(N,\\epsilon)=$(β)\$", dpi=1000)
+ks = collect(0:10:N)
+R = fill(NaN, length(ks), length(bounds_with_info) + 1)
+R[:, 1] = ks
 
-for (bound, name, color) in bounds_with_info
-      risk(k) = bound(k, β, Ntest, rtest)
-      plot!(plt, kstest, risk.(kstest), c=color, label=name)
+for (i, (bound, name, color)) in enumerate(bounds_with_info)
+    risk(k) = bound(k, β, N, r)
+    # R[:, i + 1] = risk.(ks)
+    # plot!(plt, ks, R[:, i + 1], c=color, label=name)
 end
 
 savefig(plt, "figures/compare_N.png")
+file = open("data_N.txt", "w")
+for row in eachrow(R)
+    for val in row
+        print(file, val, " ")
+    end
+    println(file, "")
+end
+close(file)
+
+N = 500
+r = 50
 
 #-------------------------------------------------------------------------------
-rs_with_info = [
-    (50, :solid, "solid"),
-    (25, :dash, "dash"),
-]
-title_r = join([
-    "$(r)\$ ($(lsn))" for (r, _, lsn) in rs_with_info 
-], ", \$", " or \$")
-title = join(["\$N=$(N)\$, \$r=", title_r, ", \$q(N,\\epsilon)=$(β)\$"])
+r = 25
 
 plt = plot(xlabel=L"d", ylabel=L"\epsilon", legend=:bottomright,
-           title=title, dpi=1000)
+           title="\$N=$(N)\$, \$r=$(r)\$, \$q(N,\\epsilon)=$(β)\$", dpi=1000)
 ks = collect(0:N)
-for (r, ls, _) in rs_with_info
-    for (bound, name, color) in bounds_partial_with_info
-        risk(k) = bound(k, β, N, r)
-        plot!(plt, ks, risk.(ks), c=color, ls=ls, label=false)
-    end
-end
-# labels
-for (_, name, color) in bounds_partial_with_info
-    plot!(plt, [], [], c=color, ls=:solid, label=name)
+R = fill(NaN, length(ks), length(bounds_weak_with_info) + 1)
+R[:, 1] = ks
+
+for (i, (bound, name, color)) in enumerate(bounds_weak_with_info)
+    risk(k) = bound(k, β, N, r)
+    R[:, i + 1] = risk.(ks)
+    plot!(plt, ks, R[:, i + 1], c=color, label=name)
 end
 
 savefig(plt, "figures/compare_r.png")
+file = open("data_r.txt", "w")
+for row in eachrow(R)
+    for val in row
+        print(file, val, " ")
+    end
+    println(file, "")
+end
+close(file)
 
 end # module
